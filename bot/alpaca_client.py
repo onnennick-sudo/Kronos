@@ -258,6 +258,15 @@ class AlpacaClient:
         }
         return self._paged_bars(f"{self._data_url}/v1beta3/crypto/us/bars", params)
 
+    def get_latest_prices(self, symbols: list[str]) -> dict[str, float]:
+        """Latest trade price per symbol from the free IEX feed. Symbols without a trade are omitted."""
+        if not symbols:
+            return {}
+        params = {"symbols": ",".join(symbols), "feed": "iex"}
+        data = self._request("GET", f"{self._data_url}/v2/stocks/trades/latest", params=params).json()
+        trades = data.get("trades") or {}
+        return {sym: float(t["p"]) for sym, t in trades.items() if t and t.get("p") is not None}
+
     def _paged_bars(self, url: str, params: dict) -> dict[str, pd.DataFrame]:
         merged: dict[str, list[dict]] = {}
         page_token = None

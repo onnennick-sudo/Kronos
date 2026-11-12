@@ -1,0 +1,103 @@
+name: Kronos Trading
+
+on:
+  schedule:
+    # Primary (HH:20 ET) and backup (HH:50 ET) slots. UTC cron; ranges cover EDT and EST.
+    - cron: '20 14-20 * * 1-5'
+    - cron: '50 14-20 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run: log decisions, place no orders'
+        type: boolean
+        default: true
+
+concurrency:
+  group: kronos-state
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  trade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BOT_ENABLED: ${{ vars.BOT_ENABLED }}
+      BOT_MODE: ${{ (github.event_name == 'workflow_dispatch' && inputs.dry_run) && 'dry_run' || vars.BOT_MODE }}
+      ALPACA_API_KEY_ID: ${{ secrets.ALPACA_API_KEY_ID }}
+      ALPACA_API_SECRET_KEY: ${{ secrets.ALPACA_API_SECRET_KEY }}
+      GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      ALERT_TO_EMAIL: ${{ secrets.ALERT_TO_EMAIL }}
+      NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+      BOT_STATE_DIR: state-repo
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - name: Checkout (default branch)
+        uses: actions/checkout@v4
+
+      - name: Gate
+        id: gate
+        run: python3 -m bot.gate ${{ github.event_name == 'workflow_dispatch' && 'manual' || 'trading' }}
+
+      - name: Bootstrap bot-state branch (first run only)
+        if: steps.gate.outputs.proceed == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          git ls-remote --exit-code --heads origin bot-state >/dev/null 2>&1
+          rc=$?
+          set -e
+          if [ "$rc" -eq 0 ]; then
+            echo "bot-state branch already exists"
+            exit 0
+          elif [ "$rc" -ne 2 ]; then
+            echo "git ls-remote failed (exit $rc)"
+            exit 1
+          fi
+          BS="$RUNNER_TEMP/bs"
+          rm -rf "$BS" && mkdir -p "$BS/state"
+          cd "$BS"
+          git init -q -b bot-state
+          printf '# Kronos bot state\n\nLogs, rankings, metrics and backtest results written by the bot workflows. Do not edit by hand.\n' > README.md
+          touch state/.keep
+          git add README.md state/.keep
+          git -c user.name=kronos-bot -c user.email=kronos-bot@users.noreply.github.com commit -q -m "Bootstrap bot-state branch"
+          git push -q "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" bot-state
+          echo "Created bot-state branch"
+
+      - name: Checkout bot-state
+        if: steps.gate.outputs.proceed == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: bot-state
+          path: state-repo
+
+      - name: Set up Python
+        if: steps.gate.outputs.proceed == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: bot/requirements.txt
+
+      - name: Cache model weights
+        if: steps.gate.outputs.proceed == 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-${{ hashFiles('bot/config.py') }}
+
+      - name: Install dependencies (CPU torch)
+        if: steps.gate.outputs.proceed == 'true'
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -r bot/requirements.txt
+
+      - name: Run trading
+        if: steps.gate.outputs.proceed == 'true'
+        run: python -m bot.run_trading

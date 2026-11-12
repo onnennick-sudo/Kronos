@@ -324,3 +324,19 @@ def test_cancel_order_other_errors_raise(no_sleep):
     fake = FakeSession(queue=[FakeResponse(403, {"message": "nope"})])
     with pytest.raises(AlpacaError):
         make(fake).cancel_order("o1")
+
+
+def test_latest_prices_parses_trades_and_uses_iex_feed():
+    fake = FakeSession(queue=[FakeResponse(200, {"trades": {"AAPL": {"p": 190.5}, "MSFT": {"p": 400}}})])
+    out = make(fake).get_latest_prices(["AAPL", "MSFT", "ZZZ"])
+    assert out == {"AAPL": 190.5, "MSFT": 400.0}   # symbols without a trade are omitted
+    call = fake.calls[0]
+    assert call["method"] == "GET"
+    assert call["url"] == config.DATA_BASE_URL + "/v2/stocks/trades/latest"
+    assert call["params"] == {"symbols": "AAPL,MSFT,ZZZ", "feed": "iex"}
+
+
+def test_latest_prices_empty_input_makes_no_request():
+    fake = FakeSession()
+    assert make(fake).get_latest_prices([]) == {}
+    assert fake.calls == []
