@@ -642,3 +642,21 @@ def test_recorded_daily_run_suppresses_daily_alert(store, commits, pushes):
 def test_watchdog_is_quiet_before_deadline_when_market_closed(store, commits, pushes):
     run_watchdog.main([], client=FakeClient(is_open=False), store=store, now=WATCH_NOON)
     assert pushes == [] and commits == []
+
+
+def test_hourly_inputs_keep_history_older_than_default_calendar_window():
+    """Regression: the hourly calendar must span the full lookback (400 bars ~ 80 sessions)."""
+    from bot import run_trading
+    now = datetime(2026, 11, 12, 11, 20, tzinfo=ET)
+    labels = [datetime.combine(d, dtime(h))
+              for d in business_days_ending(now.date(), 80)
+              for h in config.REGULAR_HOUR_LABELS
+              if datetime.combine(d, dtime(h)) <= datetime(2026, 11, 12, 10)]
+    ts = [label.replace(tzinfo=ET).astimezone(timezone.utc) for label in labels]
+    df = pd.DataFrame({"timestamps": pd.to_datetime(ts, utc=True), "open": 1.0, "high": 1.0,
+                       "low": 1.0, "close": 1.0, "volume": 1.0})
+    client = FakeClient(calendar=make_calendar(date(2026, 1, 1), date(2026, 12, 31)),
+                        bars={"1Hour": {"AAPL": df}})
+    series, _, _, errors = run_trading._hourly_inputs(client, ["AAPL"], now)
+    assert errors == {}
+    assert len(series["AAPL"]) >= config.HOURLY_LOOKBACK

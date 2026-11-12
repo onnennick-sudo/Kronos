@@ -185,7 +185,7 @@ def _hourly_decisions(client, forecaster, store, symbols, now, slot) -> tuple[di
 def _hourly_inputs(client, symbols, now):
     """Regular-session hourly series per symbol. Stale or empty tickers become errors, not data."""
     today = now.date()
-    calendar = runtime.calendar_window(client, today)
+    calendar = runtime.calendar_window(client, today, back_days=HOURLY_HISTORY_DAYS + 10)
     closes = {c["date"]: c["close"] for c in calendar}
     sessions = set(closes)
     end = now.astimezone(timezone.utc) - timedelta(minutes=config.DATA_DELAY_MINUTES)

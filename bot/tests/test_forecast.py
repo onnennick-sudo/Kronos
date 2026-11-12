@@ -208,7 +208,7 @@ def test_forecast_same_seed_reproduces_and_different_seed_differs():
 # --- loader (fake `model` package, no weights) ---
 
 def test_loader_passes_revision_and_falls_back_without_it(monkeypatch):
-    import torch
+    torch = pytest.importorskip("torch")
 
     monkeypatch.setattr(torch, "set_num_threads", lambda n: None)
     created = {}

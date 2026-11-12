@@ -25,7 +25,7 @@ on:
 
 # Shares the bot-state group so backtest commits never race trading or daily commits.
 concurrency:
-  group: kronos-state
+  group: kronos-backtest
   cancel-in-progress: false
 
 permissions:
