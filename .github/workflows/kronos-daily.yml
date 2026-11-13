@@ -6,12 +6,19 @@ on:
     - cron: '20 20-22 * * 1-5'
   workflow_dispatch:
     inputs:
+      trigger:
+        description: 'manual = you clicking Run; scheduled = external timer'
+        type: choice
+        options:
+          - manual
+          - scheduled
+        default: manual
       dry_run:
-        description: 'Dry run: forces BOT_MODE to dry_run for this run'
+        description: 'Dry run: forces BOT_MODE to dry_run for this run (manual runs only)'
         type: boolean
         default: true
       force:
-        description: 'Re-run even if this session already has a daily record'
+        description: 'Re-run even if this session already has a daily record (manual runs only)'
         type: boolean
         default: false
 
@@ -28,7 +35,6 @@ jobs:
     timeout-minutes: 45
     env:
       BOT_ENABLED: ${{ vars.BOT_ENABLED }}
-      BOT_MODE: ${{ (github.event_name == 'workflow_dispatch' && inputs.dry_run) && 'dry_run' || vars.BOT_MODE }}
       ALPACA_API_KEY_ID: ${{ secrets.ALPACA_API_KEY_ID }}
       ALPACA_API_SECRET_KEY: ${{ secrets.ALPACA_API_SECRET_KEY }}
       GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
@@ -38,12 +44,44 @@ jobs:
       BOT_STATE_DIR: state-repo
       PYTHONPATH: ${{ github.workspace }}
     steps:
+      - name: Resolve run mode
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          TRIGGER: ${{ inputs.trigger }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          FORCE: ${{ inputs.force }}
+          REPO_BOT_MODE: ${{ vars.BOT_MODE }}
+        run: |
+          # Scheduled = GitHub cron (schedule event) or external timer (trigger=scheduled).
+          if [ "$EVENT_NAME" = "schedule" ] || [ "$TRIGGER" = "scheduled" ]; then
+            GATE_MODE=daily
+            BOT_MODE_VALUE="$REPO_BOT_MODE"
+            RUN_FLAGS=""
+          else
+            # Manual run from the Actions tab.
+            GATE_MODE=manual
+            if [ "$DRY_RUN" = "true" ]; then
+              BOT_MODE_VALUE=dry_run
+            else
+              BOT_MODE_VALUE="$REPO_BOT_MODE"
+            fi
+            if [ "$FORCE" = "true" ]; then
+              RUN_FLAGS="--force"
+            else
+              RUN_FLAGS=""
+            fi
+          fi
+          echo "GATE_MODE=$GATE_MODE" >> "$GITHUB_ENV"
+          echo "BOT_MODE=$BOT_MODE_VALUE" >> "$GITHUB_ENV"
+          echo "RUN_FLAGS=$RUN_FLAGS" >> "$GITHUB_ENV"
+          echo "Resolved GATE_MODE=$GATE_MODE BOT_MODE=$BOT_MODE_VALUE RUN_FLAGS=$RUN_FLAGS"
+
       - name: Checkout (default branch)
         uses: actions/checkout@v4
 
       - name: Gate
         id: gate
-        run: python3 -m bot.gate ${{ github.event_name == 'workflow_dispatch' && 'manual' || 'daily' }}
+        run: python3 -m bot.gate "$GATE_MODE"
 
       - name: Bootstrap bot-state branch (first run only)
         if: steps.gate.outputs.proceed == 'true'
@@ -103,4 +141,4 @@ jobs:
 
       - name: Run daily
         if: steps.gate.outputs.proceed == 'true'
-        run: python -m bot.run_daily ${{ github.event_name == 'workflow_dispatch' && inputs.force && '--force' || '' }}
+        run: python -m bot.run_daily $RUN_FLAGS
