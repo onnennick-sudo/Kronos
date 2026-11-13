@@ -5,6 +5,7 @@ on:
     # Checks trading gaps during market hours, then checks the daily record after 18:30 ET (both EDT and EST).
     - cron: '15 13-22 * * 1-5'
     - cron: '45 23 * * 1-5'
+  workflow_dispatch:
 
 concurrency:
   group: kronos-state

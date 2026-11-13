@@ -7,8 +7,15 @@ on:
     - cron: '50 14-20 * * 1-5'
   workflow_dispatch:
     inputs:
+      trigger:
+        description: 'manual = you clicking Run; scheduled = external timer'
+        type: choice
+        options:
+          - manual
+          - scheduled
+        default: manual
       dry_run:
-        description: 'Dry run: log decisions, place no orders'
+        description: 'Dry run: log decisions, place no orders (manual runs only)'
         type: boolean
         default: true
 
@@ -25,7 +32,6 @@ jobs:
     timeout-minutes: 20
     env:
       BOT_ENABLED: ${{ vars.BOT_ENABLED }}
-      BOT_MODE: ${{ (github.event_name == 'workflow_dispatch' && inputs.dry_run) && 'dry_run' || vars.BOT_MODE }}
       ALPACA_API_KEY_ID: ${{ secrets.ALPACA_API_KEY_ID }}
       ALPACA_API_SECRET_KEY: ${{ secrets.ALPACA_API_SECRET_KEY }}
       GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
@@ -35,12 +41,36 @@ jobs:
       BOT_STATE_DIR: state-repo
       PYTHONPATH: ${{ github.workspace }}
     steps:
+      - name: Resolve run mode
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          TRIGGER: ${{ inputs.trigger }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          REPO_BOT_MODE: ${{ vars.BOT_MODE }}
+        run: |
+          # Scheduled = GitHub cron (schedule event) or external timer (trigger=scheduled).
+          if [ "$EVENT_NAME" = "schedule" ] || [ "$TRIGGER" = "scheduled" ]; then
+            GATE_MODE=trading
+            BOT_MODE_VALUE="$REPO_BOT_MODE"
+          else
+            # Manual run from the Actions tab.
+            GATE_MODE=manual
+            if [ "$DRY_RUN" = "true" ]; then
+              BOT_MODE_VALUE=dry_run
+            else
+              BOT_MODE_VALUE="$REPO_BOT_MODE"
+            fi
+          fi
+          echo "GATE_MODE=$GATE_MODE" >> "$GITHUB_ENV"
+          echo "BOT_MODE=$BOT_MODE_VALUE" >> "$GITHUB_ENV"
+          echo "Resolved GATE_MODE=$GATE_MODE BOT_MODE=$BOT_MODE_VALUE"
+
       - name: Checkout (default branch)
         uses: actions/checkout@v4
 
       - name: Gate
         id: gate
-        run: python3 -m bot.gate ${{ github.event_name == 'workflow_dispatch' && 'manual' || 'trading' }}
+        run: python3 -m bot.gate "$GATE_MODE"
 
       - name: Bootstrap bot-state branch (first run only)
         if: steps.gate.outputs.proceed == 'true'

@@ -62,7 +62,15 @@ def _run(mode, client, store, forecaster, now, slot) -> int:
         return 0
 
     ranking, spy_regime, notes = _ranking_context(store, today)
-    positions = client.get_positions()
+    positions, foreign = _split_positions(client.get_positions())
+    if foreign:
+        foreign_txt = ",".join(sorted(p["symbol"] for p in foreign))
+        notes.append(f"foreign_positions_ignored:{foreign_txt}")
+        runtime.alert_once(
+            store, f"foreign-{today.isoformat()}", "Kronos: unmanaged positions in account",
+            f"{foreign_txt}: ignored by the bot. Exposure cap counts only bot positions. Use a dedicated paper account.",
+            "high",
+        )
     flat = runtime.flatten_orders(client.get_open_orders())
     halted = _halt_check(client, store, mode, slot, today, account, flat)
     stop_orders = runtime.stop_orders_by_symbol(flat)
@@ -72,6 +80,8 @@ def _run(mode, client, store, forecaster, now, slot) -> int:
     symbols = sorted(set(strategy.candidates(ranking)) | set(held))
     hourly, labels = _hourly_decisions(client, forecaster, store, symbols, now, slot)
     last_prices = _last_prices(client, symbols, hourly, positions)
+    # decide() computes exposure from `positions` only, so unmanaged market value is excluded from the
+    # exposure cap on purpose. Sizing still uses account equity.
     plan = strategy.decide(
         ranking, spy_regime, hourly, positions, stop_orders,
         float(account["equity"]), halted, stopped_out, last_prices,
@@ -130,9 +140,16 @@ def _halt_check(client, store, mode, slot, today, account, flat) -> bool:
     return prior is not None or breached
 
 
+def _split_positions(positions) -> tuple[list[dict], list[dict]]:
+    """(managed, foreign): positions in the bot universe versus everything else in the account."""
+    managed = [p for p in positions if p["symbol"] in config.UNIVERSE]
+    foreign = [p for p in positions if p["symbol"] not in config.UNIVERSE]
+    return managed, foreign
+
+
 def _cancel_open_buys(client, store, mode, slot, today, flat) -> None:
     for order in flat:
-        if order.get("side") != "buy":
+        if order.get("side") != "buy" or order.get("symbol") not in config.UNIVERSE:
             continue
         fields = {"side": "buy", "order_id": order.get("id")}
         if mode != PAPER:
@@ -270,6 +287,8 @@ def _exit_position(client, store, today, slot, exit_, flat, stop_orders) -> bool
 def _cancel_and_confirm(client, symbol: str, flat) -> bool:
     try:
         for order in runtime.orders_for_symbol(flat, symbol):
+            if order.get("symbol") not in config.UNIVERSE:
+                continue  # never cancel unmanaged orders (exit symbols are always managed; defensive)
             client.cancel_order(order["id"])
         remaining = _open_orders_for(client, symbol)
         reads = 0

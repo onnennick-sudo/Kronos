@@ -46,6 +46,36 @@ Never paste keys or passwords into chat. Enter them only in GitHub.
 - **Kronos Backtest** (manual only): runs a historical test for the stocks, ETFs or crypto universe. It is started from the Actions tab and writes its report to the `bot-state` branch.
 - **Kronos Tests** (on every change to `bot/`): runs the automated tests. A red mark here means do not merge.
 
+## External timer (cron-job.org)
+
+GitHub's own schedule does not always start runs on time. This free external timer calls GitHub at exact times. Set it up once. Runs it starts behave exactly like scheduled runs.
+
+1. Create a GitHub token:
+   - Go to github.com, Settings, Developer settings, Personal access tokens, Fine-grained tokens, Generate new token.
+   - Token name: `kronos-timer`. Expiration: 1 year.
+   - Repository access: Only select repositories, then `onnennick-sudo/Kronos`.
+   - Permissions, Repository permissions, Actions: Read and write. Leave everything else at No access.
+   - Copy the token. GitHub shows it only once.
+   - Never paste the token in chat.
+2. Create a free account at https://cron-job.org.
+3. Create four jobs (the Watchdog needs two, one for daytime and one for evening). For each one: Create cronjob, then Advanced.
+   - Request method: POST.
+   - Headers (add all four):
+     - `Authorization: Bearer <token>` (paste your token in place of `<token>`)
+     - `Accept: application/vnd.github+json`
+     - `X-GitHub-Api-Version: 2022-11-28`
+     - `Content-Type: application/json`
+   - Time zone: America/New_York.
+   - Expected success response: HTTP 204.
+   - Schedule: every Monday to Friday.
+   - Jobs:
+     - **Kronos Trading**: URL `https://api.github.com/repos/onnennick-sudo/Kronos/actions/workflows/kronos-trading.yml/dispatches`. Minute 20, hours 10, 11, 12, 13, 14, 15. Request body: `{"ref":"master","inputs":{"trigger":"scheduled"}}`
+     - **Kronos Daily**: URL `https://api.github.com/repos/onnennick-sudo/Kronos/actions/workflows/kronos-daily.yml/dispatches`. Minute 25, hour 16. Request body: `{"ref":"master","inputs":{"trigger":"scheduled"}}`
+     - **Kronos Watchdog (daytime)**: URL `https://api.github.com/repos/onnennick-sudo/Kronos/actions/workflows/kronos-watchdog.yml/dispatches`. Minute 15, hours 11, 12, 13, 14, 15, 16. Request body: `{"ref":"master"}`
+     - **Kronos Watchdog (evening)**: same URL. Minute 45, hour 18. Request body: `{"ref":"master"}`
+4. Test: in cron-job.org, open the Kronos Trading job and click "Test run". Expect HTTP 204. A new "Kronos Trading" run appears in the Actions tab within about 10 seconds.
+5. Reminder: the token expires in 1 year. Set a calendar reminder to make a new token and paste it into all four jobs before it expires.
+
 ## Where logs and state live
 
 - **Run logs:** Actions tab. Click a workflow, then a run, to see its output.
