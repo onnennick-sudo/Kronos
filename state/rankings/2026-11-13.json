@@ -1,0 +1,473 @@
+{
+  "as_of": "2026-11-12",
+  "candidates": [
+    "NFLX",
+    "GS",
+    "ISRG",
+    "IBM",
+    "NVDA"
+  ],
+  "degraded": false,
+  "errors": {},
+  "model": "NeoQuasar/Kronos-small",
+  "paths": 10,
+  "ranking": [
+    {
+      "agree": 1.0,
+      "atr": 1.9413392225767787,
+      "eligible": true,
+      "r_med": 0.11314679546054995,
+      "rank": 1,
+      "regime": "BULLISH",
+      "symbol": "NFLX"
+    },
+    {
+      "agree": 0.9,
+      "atr": 27.82380543180158,
+      "eligible": true,
+      "r_med": 0.06557044381644395,
+      "rank": 2,
+      "regime": "BULLISH",
+      "symbol": "GS"
+    },
+    {
+      "agree": 0.8,
+      "atr": 14.87553804852709,
+      "eligible": true,
+      "r_med": 0.06330022946521441,
+      "rank": 3,
+      "regime": "BULLISH",
+      "symbol": "ISRG"
+    },
+    {
+      "agree": 0.7,
+      "atr": 6.656247433472903,
+      "eligible": true,
+      "r_med": 0.05059166857319941,
+      "rank": 4,
+      "regime": "BULLISH",
+      "symbol": "IBM"
+    },
+    {
+      "agree": 0.9,
+      "atr": 9.854346225859077,
+      "eligible": true,
+      "r_med": 0.045402923038601384,
+      "rank": 5,
+      "regime": "BULLISH",
+      "symbol": "NVDA"
+    },
+    {
+      "agree": 0.8,
+      "atr": 2.9997225232407887,
+      "eligible": true,
+      "r_med": 0.04067598356233604,
+      "rank": 6,
+      "regime": "BULLISH",
+      "symbol": "ABT"
+    },
+    {
+      "agree": 0.8,
+      "atr": 9.147500600675524,
+      "eligible": true,
+      "r_med": 0.03736081510442402,
+      "rank": 7,
+      "regime": "BULLISH",
+      "symbol": "QCOM"
+    },
+    {
+      "agree": 0.8,
+      "atr": 8.335095222023822,
+      "eligible": true,
+      "r_med": 0.03682742298769859,
+      "rank": 8,
+      "regime": "BULLISH",
+      "symbol": "CRM"
+    },
+    {
+      "agree": 0.7,
+      "atr": 29.647777663763573,
+      "eligible": true,
+      "r_med": 0.03578106171549744,
+      "rank": 9,
+      "regime": "BULLISH",
+      "symbol": "CAT"
+    },
+    {
+      "agree": 0.7,
+      "atr": 3.656684982136926,
+      "eligible": true,
+      "r_med": 0.023675076997276556,
+      "rank": 10,
+      "regime": "BULLISH",
+      "symbol": "CSCO"
+    },
+    {
+      "agree": 0.8,
+      "atr": 9.200672546571441,
+      "eligible": true,
+      "r_med": 0.020337339587565673,
+      "rank": 11,
+      "regime": "BULLISH",
+      "symbol": "HD"
+    },
+    {
+      "agree": 0.6,
+      "atr": 5.446905552006357,
+      "eligible": true,
+      "r_med": 0.016150858347175445,
+      "rank": 12,
+      "regime": "BULLISH",
+      "symbol": "MS"
+    },
+    {
+      "agree": 1.0,
+      "atr": 5.9250517570215,
+      "eligible": true,
+      "r_med": 0.01289131875164451,
+      "rank": 13,
+      "regime": "BULLISH",
+      "symbol": "TMUS"
+    },
+    {
+      "agree": 0.7,
+      "atr": 15.419122556744385,
+      "eligible": false,
+      "r_med": 0.009280728108568392,
+      "rank": 14,
+      "regime": "NEUTRAL",
+      "symbol": "MSFT"
+    },
+    {
+      "agree": 0.5,
+      "atr": 6.462719207589237,
+      "eligible": false,
+      "r_med": 0.007208017902158248,
+      "rank": 15,
+      "regime": "NEUTRAL",
+      "symbol": "NOW"
+    },
+    {
+      "agree": 0.6,
+      "atr": 6.387530280841517,
+      "eligible": false,
+      "r_med": 0.006023232858353489,
+      "rank": 16,
+      "regime": "NEUTRAL",
+      "symbol": "MCD"
+    },
+    {
+      "agree": 0.7,
+      "atr": 1.1986724607236385,
+      "eligible": false,
+      "r_med": -0.003635097602598003,
+      "rank": 17,
+      "regime": "NEUTRAL",
+      "symbol": "BAC"
+    },
+    {
+      "agree": 0.5,
+      "atr": 1.9409331695299932,
+      "eligible": false,
+      "r_med": -0.005344154229804721,
+      "rank": 18,
+      "regime": "NEUTRAL",
+      "symbol": "WFC"
+    },
+    {
+      "agree": 0.5,
+      "atr": 3.226065405716327,
+      "eligible": false,
+      "r_med": -0.0061723614449610276,
+      "rank": 19,
+      "regime": "NEUTRAL",
+      "symbol": "PEP"
+    },
+    {
+      "agree": 0.6,
+      "atr": 8.26701039706453,
+      "eligible": false,
+      "r_med": -0.00893912367741978,
+      "rank": 20,
+      "regime": "NEUTRAL",
+      "symbol": "ADBE"
+    },
+    {
+      "agree": 0.6,
+      "atr": 6.4905833901469085,
+      "eligible": false,
+      "r_med": -0.009448210003949797,
+      "rank": 21,
+      "regime": "NEUTRAL",
+      "symbol": "BKNG"
+    },
+    {
+      "agree": 0.6,
+      "atr": 10.934851093737581,
+      "eligible": false,
+      "r_med": -0.011719786745385152,
+      "rank": 22,
+      "regime": "BEARISH",
+      "symbol": "GE"
+    },
+    {
+      "agree": 0.7,
+      "atr": 10.195945822924385,
+      "eligible": false,
+      "r_med": -0.022004491795174885,
+      "rank": 23,
+      "regime": "BEARISH",
+      "symbol": "GOOGL"
+    },
+    {
+      "agree": 0.5,
+      "atr": 17.155732423528725,
+      "eligible": false,
+      "r_med": -0.026153016684542008,
+      "rank": 24,
+      "regime": "NEUTRAL",
+      "symbol": "AVGO"
+    },
+    {
+      "agree": 1.0,
+      "atr": 2.845379011548282,
+      "eligible": false,
+      "r_med": -0.026487262646325727,
+      "rank": 25,
+      "regime": "BEARISH",
+      "symbol": "WMT"
+    },
+    {
+      "agree": 0.9,
+      "atr": 7.345130017659423,
+      "eligible": false,
+      "r_med": -0.026555488131982496,
+      "rank": 26,
+      "regime": "BEARISH",
+      "symbol": "JPM"
+    },
+    {
+      "agree": 0.8,
+      "atr": 7.642912820240862,
+      "eligible": false,
+      "r_med": -0.03229010192836557,
+      "rank": 27,
+      "regime": "BEARISH",
+      "symbol": "AXP"
+    },
+    {
+      "agree": 0.6,
+      "atr": 13.02776791193031,
+      "eligible": false,
+      "r_med": -0.0335709112929749,
+      "rank": 28,
+      "regime": "BEARISH",
+      "symbol": "INTU"
+    },
+    {
+      "agree": 0.6,
+      "atr": 11.037984193521956,
+      "eligible": false,
+      "r_med": -0.034039859396501615,
+      "rank": 29,
+      "regime": "BEARISH",
+      "symbol": "UNH"
+    },
+    {
+      "agree": 0.7,
+      "atr": 16.56617902118275,
+      "eligible": false,
+      "r_med": -0.03426262129326407,
+      "rank": 30,
+      "regime": "BEARISH",
+      "symbol": "TSLA"
+    },
+    {
+      "agree": 0.9,
+      "atr": 9.307936317478887,
+      "eligible": false,
+      "r_med": -0.04352719292396773,
+      "rank": 31,
+      "regime": "BEARISH",
+      "symbol": "AMZN"
+    },
+    {
+      "agree": 0.9,
+      "atr": 5.346351857865919,
+      "eligible": false,
+      "r_med": -0.04491646079120931,
+      "rank": 32,
+      "regime": "BEARISH",
+      "symbol": "PM"
+    },
+    {
+      "agree": 0.8,
+      "atr": 22.97143304256817,
+      "eligible": false,
+      "r_med": -0.05584497461416693,
+      "rank": 33,
+      "regime": "BEARISH",
+      "symbol": "META"
+    },
+    {
+      "agree": 0.7,
+      "atr": 8.205183511214392,
+      "eligible": false,
+      "r_med": -0.05664475331213803,
+      "rank": 34,
+      "regime": "BEARISH",
+      "symbol": "ORCL"
+    },
+    {
+      "agree": 1.0,
+      "atr": 4.448106928086771,
+      "eligible": false,
+      "r_med": -0.06736170112321366,
+      "rank": 35,
+      "regime": "BEARISH",
+      "symbol": "XOM"
+    },
+    {
+      "agree": 1.0,
+      "atr": 5.128397617911517,
+      "eligible": false,
+      "r_med": -0.09658380433045771,
+      "rank": 36,
+      "regime": "BEARISH",
+      "symbol": "CVX"
+    },
+    {
+      "agree": 1.0,
+      "atr": 19.79554381211591,
+      "eligible": false,
+      "r_med": -0.09692791647067645,
+      "rank": 37,
+      "regime": "BEARISH",
+      "symbol": "COST"
+    },
+    {
+      "agree": 1.0,
+      "atr": 9.989625996571066,
+      "eligible": false,
+      "r_med": -0.1146386320721175,
+      "rank": 38,
+      "regime": "BEARISH",
+      "symbol": "ACN"
+    },
+    {
+      "agree": 1.0,
+      "atr": 6.843984542912127,
+      "eligible": false,
+      "r_med": -0.12816662820682562,
+      "rank": 39,
+      "regime": "BEARISH",
+      "symbol": "JNJ"
+    },
+    {
+      "agree": 1.0,
+      "atr": 3.2074103870385775,
+      "eligible": false,
+      "r_med": -0.14294315904107524,
+      "rank": 40,
+      "regime": "BEARISH",
+      "symbol": "PG"
+    },
+    {
+      "agree": 1.0,
+      "atr": 4.25311032449124,
+      "eligible": false,
+      "r_med": -0.14955853036813643,
+      "rank": 41,
+      "regime": "BEARISH",
+      "symbol": "MRK"
+    },
+    {
+      "agree": 1.0,
+      "atr": 8.384944753113874,
+      "eligible": false,
+      "r_med": -0.15016727258322793,
+      "rank": 42,
+      "regime": "BEARISH",
+      "symbol": "AAPL"
+    },
+    {
+      "agree": 1.0,
+      "atr": 1.7225536101577616,
+      "eligible": false,
+      "r_med": -0.15097863803356154,
+      "rank": 43,
+      "regime": "BEARISH",
+      "symbol": "KO"
+    },
+    {
+      "agree": 1.0,
+      "atr": 10.031145982634966,
+      "eligible": false,
+      "r_med": -0.16768007501731175,
+      "rank": 44,
+      "regime": "BEARISH",
+      "symbol": "BRK.B"
+    },
+    {
+      "agree": 1.0,
+      "atr": 7.1218437771531695,
+      "eligible": false,
+      "r_med": -0.17672609266714157,
+      "rank": 45,
+      "regime": "BEARISH",
+      "symbol": "ABBV"
+    },
+    {
+      "agree": 1.0,
+      "atr": 21.286545978029213,
+      "eligible": false,
+      "r_med": -0.1775233890376811,
+      "rank": 46,
+      "regime": "BEARISH",
+      "symbol": "TMO"
+    },
+    {
+      "agree": 1.0,
+      "atr": 14.596311107462409,
+      "eligible": false,
+      "r_med": -0.18028223269781452,
+      "rank": 47,
+      "regime": "BEARISH",
+      "symbol": "MA"
+    },
+    {
+      "agree": 1.0,
+      "atr": 9.08462691919231,
+      "eligible": false,
+      "r_med": -0.22477096111445272,
+      "rank": 48,
+      "regime": "BEARISH",
+      "symbol": "V"
+    },
+    {
+      "agree": 1.0,
+      "atr": 45.36730784816492,
+      "eligible": false,
+      "r_med": -0.2610900863920943,
+      "rank": 49,
+      "regime": "BEARISH",
+      "symbol": "LLY"
+    },
+    {
+      "agree": 1.0,
+      "atr": 40.13825886572737,
+      "eligible": false,
+      "r_med": -0.3885273218928861,
+      "rank": 50,
+      "regime": "BEARISH",
+      "symbol": "AMD"
+    }
+  ],
+  "session": "2026-11-13",
+  "spy": {
+    "agree": 0.7,
+    "last_close": 757.12,
+    "r_med": -0.008672799685196908,
+    "regime": "NEUTRAL"
+  }
+}

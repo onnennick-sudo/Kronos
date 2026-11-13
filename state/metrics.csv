@@ -1,0 +1,2 @@
+date,equity,spy_close,ew_index,bot_ret,spy_ret,ew_ret,sharpe_bot,sharpe_spy,maxdd_bot,maxdd_spy,daily_hit,daily_base,daily_n,hourly_hit,hourly_base,hourly_n,slots_expected,slots_completed,slots_missed
+2026-11-12,102665.11,757.12,1.0,,,,0.0,0.0,0.0,0.0,0.0,0.0,0,0.0,0.0,0,6,0,6
