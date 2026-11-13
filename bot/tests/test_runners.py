@@ -604,9 +604,68 @@ def test_failed_trail_keeps_old_stop_and_alerts(store, commits, pushes, monkeypa
     assert store.read_json("positions.json")["symbols"] == ["AAPL"]
 
 
+# ----- unmanaged (foreign) account positions and orders -----------------------
+
+FOREIGN_SPY = {"symbol": SPY, "qty": 249, "avg_entry_price": 500.0, "current_price": 510.0,
+               "market_value": 126_990.0}
+FOREIGN_ALERT = ("Kronos: unmanaged positions in account",
+                 "SPY: ignored by the bot. Exposure cap counts only bot positions. Use a dedicated paper account.",
+                 "high")
+
+
+def test_foreign_position_is_never_sold_or_decided_on(store, commits, pushes, monkeypatch):
+    monkeypatch.setenv("BOT_MODE", "paper")
+    save_ranking(store, [row("AAPL", 1, 0.02)])
+    client = trading_client(bar_syms=("AAPL", SPY), positions=[FOREIGN_SPY], prices={"AAPL": 100.0},
+                            allow_orders=True)
+    forecaster = FakeForecaster({SPY: HOURLY_NEG, "AAPL": HOURLY_LONG})
+    assert run_trading.main([], client=client, store=store, forecaster=forecaster, now=TRADE_NOW) == 0
+    assert not [t for t in client.trace if t[0] == "submit_market_sell"]
+    assert SPY not in {sym for call in forecaster.calls for sym in call["symbols"]}
+    assert store.read_json("positions.json")["symbols"] == ["AAPL"]    # bot's own entry only, never SPY
+    assert [p for p in pushes if p[0] == FOREIGN_ALERT[0]] == [FOREIGN_ALERT]
+    run = [r for r in store.read("runs.jsonl") if r["kind"] == "trading"][-1]
+    assert "foreign_positions_ignored:SPY" in run["notes"]
+
+
+def test_foreign_market_value_does_not_block_entries(store, commits, pushes, monkeypatch):
+    monkeypatch.setenv("BOT_MODE", "paper")
+    save_ranking(store, [row("AAPL", 1, 0.02)])
+    huge = {"symbol": SPY, "qty": 900, "avg_entry_price": 100.0, "current_price": 100.0, "market_value": 90_000.0}
+    client = trading_client(positions=[huge], prices={"AAPL": 100.0}, allow_orders=True)
+    assert run_trading.main([], client=client, store=store,
+                            forecaster=FakeForecaster({"AAPL": HOURLY_LONG}), now=TRADE_NOW) == 0
+    assert client.trace == [("submit_bracket_buy", "AAPL", 200, 96.0, 106.0)]
+
+
+def test_halt_cancels_only_universe_buys(store, commits, pushes, monkeypatch):
+    monkeypatch.setenv("BOT_MODE", "paper")
+    save_ranking(store, [row("AAPL", 1, 0.02)])
+    buy_nvda = {"id": "buy-nvda", "symbol": "NVDA", "side": "buy", "type": "market", "status": "new"}
+    buy_spy = {"id": "buy-spy", "symbol": SPY, "side": "buy", "type": "market", "status": "new"}
+    client = trading_client(equity=97_000, last_equity=100_000, open_orders=[buy_nvda, buy_spy],
+                            prices={"AAPL": 100.0}, allow_orders=True)
+    assert run_trading.main([], client=client, store=store,
+                            forecaster=FakeForecaster({"AAPL": HOURLY_LONG}), now=TRADE_NOW) == 0
+    assert client.trace == [("cancel_order", "buy-nvda")]
+    cancel_rows = [(o["symbol"], o["status"]) for o in orders(store) if o["action"] == "cancel_buy"]
+    assert cancel_rows == [("NVDA", "cancelled")]
+
+
+def test_exit_leaves_foreign_orders_alone(store, commits, pushes, sleeps, monkeypatch):
+    monkeypatch.setenv("BOT_MODE", "paper")
+    save_ranking(store, [row("MSFT", 15, -0.002, agree=0.5)])
+    spy_stop = {"id": "stop-spy", "symbol": SPY, "side": "sell", "type": "stop", "status": "new", "stop_price": "480.0"}
+    client = trading_client(bar_syms=("MSFT",), positions=[MSFT_POS, FOREIGN_SPY],
+                            open_orders=[MSFT_STOP, spy_stop], prices={"MSFT": 101.0}, allow_orders=True)
+    assert run_trading.main([], client=client, store=store, forecaster=FakeForecaster(), now=TRADE_NOW) == 0
+    assert client.trace == [("cancel_order", "stop-msft"), ("submit_market_sell", "MSFT", 10)]
+    assert store.read_json("positions.json")["symbols"] == []
+
+
 # ----- watchdog ---------------------------------------------------------------
 
-WATCH_NOON = datetime(2026, 11, 12, 13, 0, tzinfo=ET)
+WATCH_NOON =datetime(2026, 11, 12, 13, 0, tzinfo=ET)
 WATCH_EVENING = datetime(2026, 11, 12, 19, 0, tzinfo=ET)
 
 
