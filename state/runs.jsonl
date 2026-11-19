@@ -3,3 +3,4 @@
 {"kind": "daily", "key": "2026-11-16", "status": "ok", "as_of": "2026-11-13", "mode": "dry_run", "n_candidates": 5, "n_errors": 0, "scored_daily": 0, "scored_hourly": 0, "email_sent": true, "ts": "2026-11-14T01:26:29.116301+00:00"}
 {"kind": "daily", "key": "2026-11-17", "status": "ok", "as_of": "2026-11-16", "mode": "dry_run", "n_candidates": 5, "n_errors": 0, "scored_daily": 0, "scored_hourly": 0, "email_sent": true, "ts": "2026-11-17T03:30:10.032171+00:00"}
 {"kind": "daily", "key": "2026-11-18", "status": "ok", "as_of": "2026-11-17", "mode": "dry_run", "n_candidates": 5, "n_errors": 0, "scored_daily": 0, "scored_hourly": 0, "email_sent": true, "ts": "2026-11-18T02:54:50.790358+00:00"}
+{"kind": "daily", "key": "2026-11-19", "status": "ok", "as_of": "2026-11-18", "mode": "dry_run", "n_candidates": 5, "n_errors": 0, "scored_daily": 0, "scored_hourly": 0, "email_sent": true, "ts": "2026-11-19T02:22:00.684921+00:00"}
